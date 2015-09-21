@@ -9,6 +9,7 @@ use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Lib\Interfaces\PartedModule;
 use Codeception\Util\JsonArray;
+use Codeception\Util\JsonType;
 use Codeception\Util\XmlStructure;
 use Symfony\Component\BrowserKit\Cookie;
 use Codeception\Util\Soap as XmlUtils;
@@ -755,12 +756,99 @@ EOF;
     public function dontSeeResponseContainsJson($json = [])
     {
         $jsonResponseArray = new JsonArray($this->response);
-        \PHPUnit_Framework_Assert::assertFalse(
+        $this->assertFalse(
             $jsonResponseArray->containsArray($json),
             "Response JSON does not contain JSON provided\n"
             . "- <info>" . var_export($json, true) . "</info>\n"
             . "+ " . var_export($jsonResponseArray->toArray(), true)
         );
+    }
+
+    /**
+     * Checks that Json matches provided types.
+     * In case you don't know the actual values of JSON data returned you can match them by type.
+     * Starts check with a root element. If JSON data is array it will check the first element of an array.
+     *
+     * Basic example:
+     *
+     * ```php
+     * <?php
+     * // {'user_id': 1, 'name': 'davert', 'is_active': false}
+     * $I->seeResponseIsJsonType([
+     *      'user_id' => 'integer',
+     *      'name' => 'string|null',
+     *      'is_active' => 'boolean'
+     * ]);
+     * ?>
+     * ```
+     *
+     * In this case you can match that record contains fields with data types you expected.
+     * The list of possible data types:
+     *
+     * * string
+     * * integer
+     * * float
+     * * array (json object is array as well)
+     * * boolean
+     *
+     * You can also use nested data type structures:
+     *
+     * ```php
+     * <?php
+     * // {'user_id': 1, 'name': 'davert', 'company': {'name': 'Codegyre'}}
+     * $I->seeResponseIsJsonType([
+     *      'user_id' => 'integer',
+     *      'company' => ['name' => 'string']
+     * ]);
+     * ?>
+     * ```
+     *
+     * You can also apply filters to check values. Filter can be applied with `:` char after the type declatation.
+     *
+     * Here is the list of possible filters:
+     *
+     * * `integer:>{val}` - checks that integer is greater than {val} (works with float and string types too).
+     * * `integer:<{val}` - checks that integer is lower than {val} (works with float and string types too).
+     * * `string:url` - checks that value is valid url.
+     * * `string:regex({val})` - checks that string matches a regex provided with {val}
+     *
+     * This is how filter can be used:
+     *
+     * ```php
+     * <?php
+     * // {'user_id': 1, 'email' => 'davert@codeception.com'}
+     * $I->seeResponseIsJsonType([
+     *      'user_id' => 'string:>0:<1000', // multiple filters can be used
+     *      'email' => 'string:regex(~\@~)' // we just check that @ char is included
+     * ]);
+     *
+     * // {'user_id': '1'}
+     * $I->seeResponseIsJsonType([
+     *      'user_id' => 'string:>0', // works with strings as well
+     * }
+     * ?>
+     * ```
+     *
+     * @param array $jsonType
+     */
+    public function seeResponseMatchesJsonType(array $jsonType)
+    {
+        $jsonArray = new JsonArray($this->response);
+        $matched = (new JsonType($jsonArray))->matches($jsonType);
+        $this->assertTrue($matched, $matched);
+    }
+
+    /**
+     * Opposite to `seeResponseMatchesJsonType`.
+     *
+     * @see seeResponseMatchesJsonType
+     * @param $jsonType
+     */
+    public function dontSeeResponseMatchesJsonType($jsonType)
+    {
+        $jsonArray = new JsonArray($this->response);
+        $matched = (new JsonType($jsonArray))->matches($jsonType);
+        $this->assertNotEquals(true, $matched, sprintf("Unexpectedly the response matched the %s data type", var_export($jsonType, true)));
     }
 
     /**

@@ -89,4 +89,25 @@ class JsonArrayTest extends \Codeception\TestCase\Test
         $expectedArray = ['foo', 'bar', 'foo'];
         $this->assertTrue($jsonArray->containsArray($expectedArray));       
     }
+
+    public function testMatchingTypes()
+    {
+        $jsonArray = new JsonArray(json_encode([
+            'id' => 1,
+            'retweeted' => false,
+            'in_reply_to_screen_name' => null,
+            'user' => ['url' => 'http://davert.com'
+            ]
+        ]));
+
+        $this->assertTrue($jsonArray->jsonMatchesType($types));
+
+        $types2['id'] = 'string';
+        $this->assertContains('is not of type', $jsonArray->jsonMatchesType($types));
+
+        $types2['id'] = 'string';
+        $this->assertContains('is not of type', $jsonArray->jsonMatchesType($types));
+
+
+    }
 }
