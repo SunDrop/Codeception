@@ -162,7 +162,7 @@ class JsonArray
      *
      * @return array|bool|null
      */
-    public function associativeArrayIntersect(array $arr1, array $arr2)
+    private function associativeArrayIntersect(array $arr1, array $arr2)
     {
         $commonKeys = array_intersect(array_keys($arr1), array_keys($arr2));
 
