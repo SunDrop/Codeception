@@ -2,6 +2,7 @@
 
 #### 2.1.3
 
+* [REST] allowed matching data types by with new methods `seeResponseMatchesJsonType` and `dontSeeResponseMatchesJsonType`. See #2391
 * [Symfony2] Fixed issue when accesing profiler when no request has been performed #652.
 * Fixed issue with trailing slashes in `seeCurrentUrlEquals` and `dontSeeCurrentUrlEquals` methods #2324. By @janhenkgerritsen
 * Warning is displayed once using unconfigured environment.
