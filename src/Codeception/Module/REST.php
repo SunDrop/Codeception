@@ -797,7 +797,7 @@ EOF;
      * <?php
      * // {'user_id': 1, 'name': 'davert', 'company': {'name': 'Codegyre'}}
      * $I->seeResponseIsJsonType([
-     *      'user_id' => 'integer',
+     *      'user_id' => 'integer|string', // multiple types
      *      'company' => ['name' => 'string']
      * ]);
      * ?>
@@ -812,7 +812,7 @@ EOF;
      * * `string:url` - checks that value is valid url.
      * * `string:regex({val})` - checks that string matches a regex provided with {val}
      *
-     * This is how filter can be used:
+     * This is how filters can be used:
      *
      * ```php
      * <?php
@@ -830,6 +830,7 @@ EOF;
      * ```
      *
      * @param array $jsonType
+     * @part json
      */
     public function seeResponseMatchesJsonType(array $jsonType)
     {
@@ -841,6 +842,7 @@ EOF;
     /**
      * Opposite to `seeResponseMatchesJsonType`.
      *
+     * @part json
      * @see seeResponseMatchesJsonType
      * @param $jsonType
      */
