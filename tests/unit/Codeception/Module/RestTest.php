@@ -271,6 +271,15 @@ class RestTest extends \PHPUnit_Framework_TestCase
         $this->module->dontSeeResponseMatchesJsonType(['xxx' => 'integer', 'user_id' => 'integer:<10']);
     }
 
+    public function testJsonTypeMatchesWithJsonPath()
+    {
+        $this->module->response = '{"users": [{ "name": "davert"}, {"id": 1}]}';
+        $this->module->seeResponseMatchesJsonType(['name' => 'string'], '$.users[0]');
+        $this->module->seeResponseMatchesJsonType(['id' => 'integer'], '$.users[1]');
+        $this->module->dontSeeResponseMatchesJsonType(['id' => 'integer'], '$.users[0]');
+    }
+
+
     protected function shouldFail()
     {
         $this->setExpectedException('PHPUnit_Framework_AssertionFailedError');

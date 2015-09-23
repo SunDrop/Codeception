@@ -768,6 +768,7 @@ EOF;
      * Checks that Json matches provided types.
      * In case you don't know the actual values of JSON data returned you can match them by type.
      * Starts check with a root element. If JSON data is array it will check the first element of an array.
+     * You can specify the path in the json which should be checked with JsonPath
      *
      * Basic example:
      *
@@ -779,6 +780,10 @@ EOF;
      *      'name' => 'string|null',
      *      'is_active' => 'boolean'
      * ]);
+     *
+     * // narrow down matching with JsonPath:
+     * // {"users": [{ "name": "davert"}, {"id": 1}]}
+     * $I->seeResponseMatchesJsonType(['name' => 'string'], '$.users[0]');
      * ?>
      * ```
      *
@@ -832,9 +837,12 @@ EOF;
      * @param array $jsonType
      * @part json
      */
-    public function seeResponseMatchesJsonType(array $jsonType)
+    public function seeResponseMatchesJsonType(array $jsonType, $jsonPath = null)
     {
         $jsonArray = new JsonArray($this->response);
+        if ($jsonPath) {
+            $jsonArray = $jsonArray->filterByJsonPath($jsonPath);
+        }
         $matched = (new JsonType($jsonArray))->matches($jsonType);
         $this->assertTrue($matched, $matched);
     }
@@ -844,11 +852,16 @@ EOF;
      *
      * @part json
      * @see seeResponseMatchesJsonType
-     * @param $jsonType
+     * @param $jsonType jsonType structure
+     * @param null $jsonPath optionally set specific path to structure with JsonPath
+     * @throws \Exception
      */
-    public function dontSeeResponseMatchesJsonType($jsonType)
+    public function dontSeeResponseMatchesJsonType($jsonType, $jsonPath = null)
     {
         $jsonArray = new JsonArray($this->response);
+        if ($jsonPath) {
+            $jsonArray = $jsonArray->filterByJsonPath($jsonPath);
+        }
         $matched = (new JsonType($jsonArray))->matches($jsonType);
         $this->assertNotEquals(true, $matched, sprintf("Unexpectedly the response matched the %s data type", var_export($jsonType, true)));
     }
